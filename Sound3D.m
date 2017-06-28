@@ -19,8 +19,10 @@ classdef Sound3D < handle
 			obj.SampleRate = SampleRate;
 			obj.PlayCount = PlayCount;
 			obj.Active = Active;
-			
-			obj.FileReader = dsp.AudioFileReader(SoundFile, 'SamplesPerFrame', SampleRate, 'PlayCount', PlayCount);
+		end
+		
+		function createFR(obj)
+			obj.FileReader = dsp.AudioFileReader(obj.SoundFile, 'SamplesPerFrame', obj.SampleRate, 'PlayCount', obj.PlayCount);
 		end
 		
 		function nextStep = getStep(obj)

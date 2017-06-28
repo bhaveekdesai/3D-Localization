@@ -7,6 +7,8 @@ classdef SoundManager < handle
 		Sounds;
 		FilePlayer;
 		
+		rate;
+		
 		%Contains the sound that total sound that will be played this tic
 		SoundToPlay = [];
 		
@@ -29,17 +31,29 @@ classdef SoundManager < handle
 		%Constructor
 		function obj = SoundManager(Sounds, rate, ToIgnore)
 			obj.Sounds = Sounds;
-			obj.FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', rate, 'SampleRate', Sounds{1}.FileReader.SampleRate);
+			obj.rate = rate;
 			
 			obj.ToIgnore = ToIgnore;
+		end
+		
+		function setupEnvironment(obj)
+			for i = 1:length(obj.Sounds);
+				createFR(obj.Sounds{i});
+			end
 			
-			obj.prevSig = zeros(length(obj.Sounds), rate);
-			obj.currSig = zeros(length(obj.Sounds), rate);
+			createFP(obj);
+			
+			obj.prevSig = zeros(length(obj.Sounds), obj.rate);
+			obj.currSig = zeros(length(obj.Sounds), obj.rate);
+		end
+		
+		function createFP(obj)
+			obj.FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', obj.rate, 'SampleRate', obj.Sounds{1}.FileReader.SampleRate);
 		end
 		
 		%Goe through each sound and calculates it's sound matrix and then
 		%adds it to the SoundToPlay matrix
-		function prepareSound(obj, playerPos, forward, hrir_l, hrir_r, ITD, maze)
+		function prepareSound(obj, plr, hrir_l, hrir_r, ITD, maze)
 			%Set up variables and refresh the SoundToPlay
 			wav_left = [];
 			wav_right = [];
@@ -66,18 +80,19 @@ classdef SoundManager < handle
 				if (~maze)
 					%If not maze then check distance and skip if too far
 					%If it's close enough calculate the effect on the sound
-					dist = playerPos - obj.Sounds{i}.Position;
+					dist = plr.Position - obj.Sounds{i}.Position;
 					dist = norm(dist);
 
-					if (dist > 10)
+					if (dist > 1000)
 						continue;
 					end
-
+					
+					dist = dist/200;
 					dist = dist*dist;
 				end
 				
 				%Get the azimuth angle and elevation index
-				[azAngle, eIndex] = FindAngle(playerPos, forward, obj.Sounds{i}.Position);
+				[azAngle, eIndex] = FindAngle(plr, obj.Sounds{i}.Position);
 				%Get the correct index for a
 				aIndex = find(obj.azimuths == azAngle,1);
 

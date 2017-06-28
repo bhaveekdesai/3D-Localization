@@ -14,7 +14,7 @@ port = 18888;
 % profiling parameters
 rounds = 500;
 count = rounds;
-interval = 0.1;
+interval = 0.25;
 rate = 11050;
 %44100 - 1
 %11050 - 0.25
@@ -35,45 +35,85 @@ win = false;
 
 localMan = 0;
 
+connFront = 0;
+connBack = 0;
+
 if (~debugSound)
-	localMan = LocalizationManager(26, 27);
+	%localMan = LocalizationManager(ip, port, 26, 27);
 	
-	%{	
 	% add python scripts folder to path, in the repository, the default
 	% location of the python scripts locates at '[project_root]/py_scripts'
-		PyPath = py.sys.path;
-		if PyPath.count('.') == 0
-		   insert(PyPath,int32(0),'.');
-		end
-		PyModule = py.sys.modules;
-		if isa(PyModule.get('udpclient'),'py.NoneType')
-			py.importlib.import_module('udpclient');
-		end
+	PyPath = py.sys.path;
+	if PyPath.count('.') == 0
+	   insert(PyPath,int32(0),'.');
+	end
+	PyModule = py.sys.modules;
+	if isa(PyModule.get('udpclient'),'py.NoneType')
+		py.importlib.import_module('udpclient');
+	end
 
-		%Beacon IDs
-		mBIdFront = 26;
-		mBIdBack = 27;
+	%Beacon Ids
+		%First beacon is always 0,0
+	beacons = [6,2,3,4];
+	conns = {};
+	beaconPositions = zeros(length(beacons), 2);
+	farthestDistance = 0;
+	farthestBeacon = 0;
+	
+	%Hedgehog IDs
+	mBIdFront = 26;
+	mBIdBack = 27;
+	
+	for i = 1:length(beacons)
+		%Open the connect
+		conns{i} = py.udpclient.udp_factory(ip,uint16(port),uint16(beacons(i)));
+		
+		%Get the beacon position
+		temp = conns{i}.request_position();
+		beaconPositions(i, :) = [double(temp{1}); double(temp{2})]/1;
+		
+		%Close the connection
+		conns{i}.close();
+		
+		%Determine the distance from the first beacon
+		distance = beaconPositions(i, :) - beaconPositions(1,:);
+		distance = norm(distance);
+		
+		if (farthestDistance >= distance)
+			farthestBeacon = i;
+			farthestDistance = distance;
+		end
+		
+	end
 
-		%Open the connection for each beacon
-		connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-		connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
-	%}
+	%Open the connection for each beacon
+	connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
+	connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 end
 
 Sounds = {};
 
 %For Maze it goes Left, Right, Up, Down
-Sounds{1} = Sound3D('3D_Oboe.wav', [0;0], rate, 1000, true);
-Sounds{2} = Sound3D('3D_Clarinet.wav', [5;0], rate, 1000, true);
-Sounds{3} = Sound3D('3D_Flute.wav', [0;5], rate, 1000, true);
-Sounds{4} = Sound3D('3D_Bassoon.wav', [5;5], rate, 1000, true);
-Sounds{5} = Sound3D('MiddleC.wav', [10;10], rate, 1000, false);
-Sounds{6} = Sound3D('RumbleStrip.wav', [0;0], rate, 1000, false);
+%Sounds{1} = Sound3D('3D_Oboe.wav', [2.46;1.38], rate, 1000, true);
+%Sounds{2} = Sound3D('3D_Clarinet.wav', [5;0], rate, 1000, true);
+%Sounds{3} = Sound3D('3D_Flute.wav', [0;5], rate, 1000, true);
+%Sounds{4} = Sound3D('3D_Bassoon.wav', [5;5], rate, 1000, true);
+%Sounds{5} = Sound3D('MiddleC.wav', [10;10], rate, 1000, false);
+%Sounds{6} = Sound3D('RumbleStrip.wav', [0;0], rate, 1000, false);
 
-soundsToIgnore = [true, true, true, true, false, false];
+soundsToIgnore = [true, true, true, true, true, true];
 
 %Sound Manager
 soundMan = SoundManager(Sounds, rate, soundsToIgnore);
+
+if (debugSound)
+	beaconPosition(1,:) = [1000;320];
+	farthestBeacon = 1;
+end
+
+Menu(beaconPosition(farthestBeacon, 1),beaconPosition(farthestBeacon, 2), soundMan);
+
+setupEnvironment(soundMan);
 
 %MOVE
 %Size of wall buffer for certain effects
@@ -92,7 +132,7 @@ global CellWalls;
 
 %REPLACE
 %Dummy values
-playerPos = [2.5;2.5];
+playerPos = [100;100];
 fracLeft = 0.5;
 fracBott = 0.5;
 CellWalls = [false, false, false, false];
@@ -109,7 +149,9 @@ t = 0;
 
 if (~debugSound)
 %Start maze UI and everything it does
-	maze_UI();
+	if (maze)
+		maze_UI();
+	end
 
 	%Decide if you want to use a single or 2 hedgehogs
 	if (FrontAndBack == false)
@@ -345,7 +387,7 @@ while (~win)
 	end
 	%}
 	
-	prepareSound(soundMan, plr.Position, forward, hrir_l, hrir_r, ITD, maze);
+	prepareSound(soundMan, plr, hrir_l, hrir_r, ITD, maze);
 	
 	%Play that sound
 	playSound(soundMan);

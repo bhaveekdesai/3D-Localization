@@ -1,4 +1,4 @@
-function [ azAngle, eIndex ] = FindAngle( playerPos, playerFor, soundPos)
+function [ azAngle, eIndex ] = FindAngle( plr, soundPos)
 %FINDANGLE Gets the rounded angles of azimuth and elevation
 %   Takes player pos and direction and calulcates what precise angle the
 %   hrtf should play from
@@ -7,17 +7,15 @@ function [ azAngle, eIndex ] = FindAngle( playerPos, playerFor, soundPos)
 
 	%Get the vector from the player to the sound pos and
 	%normalizes it
-    directionVec = soundPos - playerPos;
+    directionVec = soundPos - plr.Position;
 	directionVec = normc(directionVec);
-	
-	playerRight = [playerFor(2) -playerFor(1)];
 
 	%Calculates the degree angle between the forward vector and the source
 	%of the sound
-	azAngle = acosd(dot(directionVec, playerFor));
+	azAngle = acosd(dot(directionVec, plr.Forward));
 	
 	%Make the angle negative if it needs to be
-	if (acosd(dot(directionVec, playerRight)) > 90)
+	if (acosd(dot(directionVec, plr.Right)) > 90)
 		azAngle = -azAngle;
 	end
 	

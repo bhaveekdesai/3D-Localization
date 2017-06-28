@@ -22,7 +22,7 @@ function varargout = Menu(varargin)
 
 % Edit the above text to modify the response to help Menu
 
-% Last Modified by GUIDE v2.5 20-Jun-2017 12:19:44
+% Last Modified by GUIDE v2.5 27-Jun-2017 22:15:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,6 +53,27 @@ function Menu_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   unrecognized PropertyName/PropertyValue pairs from the
 %            command line (see VARARGIN)
 
+if (nargin > 4)
+	set(handles.Environment, 'Position', [360 20 varargin{1}+17 varargin{2}+30]);
+	
+	set(handles.Background, 'Position', [200 300 380+handles.Environment.Position(3) 40+handles.Environment.Position(4)]);
+	
+	set(handles.Start, 'Position', [20 varargin{2} 150 50]);
+	set(handles.Reset, 'Position', [190 varargin{2} 150 50]);
+	
+	set(handles.SoundControls, 'Position', [20 varargin{2}-230 320 225]);
+	
+	handles.SoundMan = varargin{3};
+	
+	handles.SoundBoxes = {1};
+	
+	handles.Active = 0;
+	
+	k = dir('*.wav');
+	handles.filenames = {k.name}';
+	handles.FileChoose.String = handles.filenames;
+end
+
 % Choose default command line output for Menu
 handles.output = hObject;
 
@@ -60,7 +81,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % UIWAIT makes Menu wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+uiwait(handles.Background);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -74,47 +95,138 @@ function varargout = Menu_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes when selected object is changed in unitgroup.
-function unitgroup_SelectionChangedFcn(hObject, eventdata, handles)
-% hObject    handle to the selected object in unitgroup 
+% --- Executes on button press in Start.
+function Start_Callback(hObject, eventdata, handles)
+% hObject    handle to Start (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+uiresume(handles.Background);
+
+% --- Executes on button press in Reset.
+function Reset_Callback(hObject, eventdata, handles)
+% hObject    handle to Reset (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.SoundMan.Sounds = {};
+
+for i = 1:length(handles.SoundBoxes)
+	delete(handles.SoundBoxes{i});
+end
+handles.SoundChoose.String = {'Sound Number', '0'};
+handles.SoundBoxes = {1};
+guidata(hObject, handles);
+drawnow;
+
+% --------------------------------------------------------------------
+function Environment_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to Environment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%Get mouse coords and convert them into panel space
+coords = get(gcf, 'CurrentPoint');
+coords = [(coords(1)-7)-360; (coords(2)-7)-20];
 
-% --- Executes on button press in calculate.
-function calculate_Callback(hObject, eventdata, handles)
-% hObject    handle to calculate (see GCBO)
+%Create the sound in put it into worldspace
+soundNumber = length(handles.SoundMan.Sounds)+1;
+handles.SoundMan.Sounds{soundNumber} = Sound3D('3D_Bassoon.wav', coords, handles.SoundMan.rate, 1000, true);
+
+%Set Up the new Sound Box
+newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+newSound.FontSize = 8;
+newSound.ForegroundColor = [1 1 1];
+newSound.String = int2str(soundNumber);
+newSound.Position = [coords(1) coords(2) 14 14];
+newSound.BackgroundColor = [0 0 1];
+handles.SoundBoxes{soundNumber} = newSound;
+
+handles.SoundChoose.String{soundNumber} = soundNumber;
+
+guidata(hObject, handles);
+
+%Update the screen
+drawnow;
+
+
+% --- Executes on button press in UpArror.
+function UpArror_Callback(hObject, eventdata, handles)
+% hObject    handle to UpArror (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (length(handles.SoundMan.Sounds) ~= 0)
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position + [0; 10];
+	handles.SoundBoxes{handles.SoundChoose.Value}.Position = handles.SoundBoxes{handles.SoundChoose.Value}.Position + [0 10 0 0];
+	
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	guidata(hObject, handles);
+	drawnow;
+end
+
+% --- Executes on button press in RightArrow.
+function RightArrow_Callback(hObject, eventdata, handles)
+% hObject    handle to RightArrow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (length(handles.SoundMan.Sounds) ~= 0)
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position + [10; 0];
+	handles.SoundBoxes{handles.SoundChoose.Value}.Position = handles.SoundBoxes{handles.SoundChoose.Value}.Position + [10 0 0 0];
+	
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	guidata(hObject, handles);
+	drawnow;
+end
+	
+% --- Executes on button press in LeftArrow.
+function LeftArrow_Callback(hObject, eventdata, handles)
+% hObject    handle to LeftArrow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (length(handles.SoundMan.Sounds) ~= 0)
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position + [-10; 0];
+	handles.SoundBoxes{handles.SoundChoose.Value}.Position = handles.SoundBoxes{handles.SoundChoose.Value}.Position + [-10 0 0 0];
+	
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	guidata(hObject, handles);
+	drawnow;
+end
+
+% --- Executes on button press in DownArrow.
+function DownArrow_Callback(hObject, eventdata, handles)
+% hObject    handle to DownArrow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (length(handles.SoundMan.Sounds) ~= 0)
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position + [0; -10];
+	handles.SoundBoxes{handles.SoundChoose.Value}.Position = handles.SoundBoxes{handles.SoundChoose.Value}.Position + [0 -10 0 0];
+	
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	guidata(hObject, handles);
+	drawnow;
+end
+
+% --- Executes on selection change in SoundChoose.
+function SoundChoose_Callback(hObject, eventdata, handles)
+% hObject    handle to SoundChoose (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-% --- Executes on button press in reset.
-function reset_Callback(hObject, eventdata, handles)
-% hObject    handle to reset (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on selection change in popupmenu3.
-function popupmenu3_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu3
-
+% Hints: contents = cellstr(get(hObject,'String')) returns SoundChoose contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from SoundChoose
+handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+disp(handles.SoundMan.Sounds{handles.SoundChoose.Value}.SoundFile);
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
+function SoundChoose_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SoundChoose (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -125,24 +237,35 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton7.
-function pushbutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton7 (see GCBO)
+% --- Executes on selection change in FileChoose.
+function FileChoose_Callback(hObject, eventdata, handles)
+% hObject    handle to FileChoose (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hints: contents = cellstr(get(hObject,'String')) returns FileChoose contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from FileChoose
 
-% --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton8 (see GCBO)
+% --- Executes during object creation, after setting all properties.
+function FileChoose_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to FileChoose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in SaveSoundFile.
+function SaveSoundFile_Callback(hObject, eventdata, handles)
+% hObject    handle to SaveSoundFile (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in english.
-function english_Callback(hObject, eventdata, handles)
-% hObject    handle to english (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of english
+if (length(handles.SoundMan.Sounds) ~= 0)
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.SoundFile = handles.FileChoose.String{handles.FileChoose.Value};
+	
+	guidata(hObject, handles);
+end
