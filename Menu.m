@@ -69,9 +69,11 @@ if (nargin > 4)
 	
 	handles.Active = 0;
 	
-	k = dir('*.wav');
+	k = dir('Sounds/*.wav');
 	handles.filenames = {k.name}';
 	handles.FileChoose.String = handles.filenames;
+	
+	handles.Stop = false;
 end
 
 % Choose default command line output for Menu
@@ -114,6 +116,7 @@ for i = 1:length(handles.SoundBoxes)
 end
 handles.SoundChoose.String = {'Sound Number', '0'};
 handles.SoundBoxes = {1};
+
 guidata(hObject, handles);
 drawnow;
 
@@ -129,7 +132,7 @@ coords = [(coords(1)-7)-360; (coords(2)-7)-20];
 
 %Create the sound in put it into worldspace
 soundNumber = length(handles.SoundMan.Sounds)+1;
-handles.SoundMan.Sounds{soundNumber} = Sound3D('3D_Bassoon.wav', coords, handles.SoundMan.rate, 1000, true);
+handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/3D_Bassoon.wav', coords, handles.SoundMan.rate, 1000, true);
 
 %Set Up the new Sound Box
 newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
@@ -265,7 +268,11 @@ function SaveSoundFile_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if (length(handles.SoundMan.Sounds) ~= 0)
-	handles.SoundMan.Sounds{handles.SoundChoose.Value}.SoundFile = handles.FileChoose.String{handles.FileChoose.Value};
+	handles.SoundMan.Sounds{handles.SoundChoose.Value}.SoundFile = horzcat('Sounds/', handles.FileChoose.String{handles.FileChoose.Value});
 	
 	guidata(hObject, handles);
 end
+
+function CloseRequestFcn(hObject, eventdata, handles)
+handles.Stop = true;
+guidata(hObject, handles);

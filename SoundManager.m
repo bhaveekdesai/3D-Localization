@@ -89,13 +89,17 @@ classdef SoundManager < handle
 					
 					dist = dist/200;
 					dist = dist*dist;
+					
+					if (dist < 1)
+						dist = 1;
+					end
 				end
 				
 				%Get the azimuth angle and elevation index
 				[azAngle, eIndex] = FindAngle(plr, obj.Sounds{i}.Position);
 				%Get the correct index for a
 				aIndex = find(obj.azimuths == azAngle,1);
-
+				
 				%Convolve the sound for that source
 				left = squeeze(hrir_l(aIndex, eIndex, :));
 				right = squeeze(hrir_r(aIndex, eIndex, :));
@@ -150,7 +154,7 @@ classdef SoundManager < handle
 				%CONSIDER MOVING!!!
 				%Post Processing
 				if (~maze)
-					%Apply the distance diminishment
+					%Apply the distance decay
 					wav_left = wav_left/(dist);
 					wav_right = wav_right/(dist);
 				end

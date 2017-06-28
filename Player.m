@@ -41,6 +41,8 @@ classdef Player < handle
 				%If only 1 hedgehog then make that the position
 				obj.Position = obj.PosFront;
 			end
+			
+			%Check to see that the beacon didn't jump too far
 		end
 		
 		%Calculates the forward vector
@@ -52,7 +54,7 @@ classdef Player < handle
 				
 				obj.Right = normc(obj.Right);
 				
-				obj.Forward = [obj.Forward(2) obj.Forward(1)];
+				obj.Forward = [-obj.Right(2) obj.Right(1)];
 			end
 		end
 	end

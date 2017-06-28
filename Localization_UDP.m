@@ -14,13 +14,16 @@ port = 18888;
 % profiling parameters
 rounds = 500;
 count = rounds;
-interval = 0.25;
-rate = 11050;
+interval = 0.1;
+rate = 44100;
+
+rate = 11050;% rate*interval;
 %44100 - 1
 %11050 - 0.25
+%4410 - .1
 
-FrontAndBack = false;
-debugSound = true;
+FrontAndBack = true;
+debugSound = false;
 maze = false;
 
 %Get HRTF from files
@@ -79,7 +82,9 @@ if (~debugSound)
 		distance = beaconPositions(i, :) - beaconPositions(1,:);
 		distance = norm(distance);
 		
-		if (farthestDistance >= distance)
+		disp(distance);
+		
+		if (farthestDistance <= distance)
 			farthestBeacon = i;
 			farthestDistance = distance;
 		end
@@ -107,11 +112,11 @@ soundsToIgnore = [true, true, true, true, true, true];
 soundMan = SoundManager(Sounds, rate, soundsToIgnore);
 
 if (debugSound)
-	beaconPosition(1,:) = [1000;320];
+	beaconPositions(1,:) = [1000;320];
 	farthestBeacon = 1;
 end
 
-Menu(beaconPosition(farthestBeacon, 1),beaconPosition(farthestBeacon, 2), soundMan);
+menu = Menu(beaconPositions(farthestBeacon, 1),beaconPositions(farthestBeacon, 2), soundMan);
 
 setupEnvironment(soundMan);
 
@@ -132,7 +137,7 @@ global CellWalls;
 
 %REPLACE
 %Dummy values
-playerPos = [100;100];
+playerPos = [320;170];
 fracLeft = 0.5;
 fracBott = 0.5;
 CellWalls = [false, false, false, false];
@@ -165,8 +170,15 @@ if (~debugSound)
 end
 
 %Keep going until the user won (By reaching the exit cell)
-while (~win)	
+while (true)	
 	if (~debugSound)
+		
+		%coordsFront = connFront.request_position();
+		
+		%if(FrontAndBack)
+		%	coordsBack = connBack.request_position();
+		%end
+		
 		calcPosition(plr, coordsFront, coordsBack);
 		calcForward(plr);
 		
@@ -391,6 +403,9 @@ while (~win)
 	
 	%Play that sound
 	playSound(soundMan);
+	
+	%Allow the sound to play
+	%pause(0);
 end
 
 %Clean up
