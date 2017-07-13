@@ -22,7 +22,7 @@ function varargout = Menu(varargin)
 
 % Edit the above text to modify the response to help Menu
 
-% Last Modified by GUIDE v2.5 27-Jun-2017 22:15:51
+% Last Modified by GUIDE v2.5 03-Jul-2017 11:18:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -73,7 +73,143 @@ if (nargin > 4)
 	handles.filenames = {k.name}';
 	handles.FileChoose.String = handles.filenames;
 	
-	handles.Stop = false;
+	%Hard Code
+	
+	%General
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/General_James_ODonnell.wav', [70; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [70 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Baseball
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/BaseballSong.wav', [90; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [90 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Softball
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/Softball_Charles_DeTore.wav', [220; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [220 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Volleyball
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/Volleyball.wav', [410; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [410 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Bowling
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/BowlingPins.wav', [530; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [530 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Track
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/Track_Bob_Zumbado.wav', [695; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [695 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Fishing
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/FishingFeedingFrenzy.wav', [910; 0], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [910 0 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
+	
+	%Swimming/Cayuco
+	soundNumber = length(handles.SoundMan.Sounds)+1;
+	handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/RowingBoat.wav', [925; 150], handles.SoundMan.rate, 1000, true);
+
+	newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
+	newSound.FontSize = 8;
+	newSound.ForegroundColor = [1 1 1];
+	newSound.String = int2str(soundNumber);
+	newSound.Position = [925 150 14 14];
+	newSound.BackgroundColor = [0 0 1];
+	handles.SoundBoxes{soundNumber} = newSound;
+
+	handles.SoundChoose.String{soundNumber} = soundNumber;
+
+	handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+	handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
 end
 
 % Choose default command line output for Menu
@@ -132,7 +268,7 @@ coords = [(coords(1)-7)-360; (coords(2)-7)-20];
 
 %Create the sound in put it into worldspace
 soundNumber = length(handles.SoundMan.Sounds)+1;
-handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/3D_Bassoon.wav', coords, handles.SoundMan.rate, 1000, true);
+handles.SoundMan.Sounds{soundNumber} = Sound3D('Sounds/RunningConcrete.wav', coords, handles.SoundMan.rate, 1000, true);
 
 %Set Up the new Sound Box
 newSound = uicontrol('Style', 'text' ,'Parent', handles.Environment);
@@ -144,6 +280,9 @@ newSound.BackgroundColor = [0 0 1];
 handles.SoundBoxes{soundNumber} = newSound;
 
 handles.SoundChoose.String{soundNumber} = soundNumber;
+
+handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
+handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
 
 guidata(hObject, handles);
 
@@ -225,7 +364,6 @@ function SoundChoose_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from SoundChoose
 handles.LocX.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(1);
 handles.LocY.String = handles.SoundMan.Sounds{handles.SoundChoose.Value}.Position(2);
-disp(handles.SoundMan.Sounds{handles.SoundChoose.Value}.SoundFile);
 
 % --- Executes during object creation, after setting all properties.
 function SoundChoose_CreateFcn(hObject, eventdata, handles)
@@ -273,6 +411,35 @@ if (length(handles.SoundMan.Sounds) ~= 0)
 	guidata(hObject, handles);
 end
 
-function CloseRequestFcn(hObject, eventdata, handles)
-handles.Stop = true;
+% --- Executes when user attempts to close Background.
+function Background_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to Background (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.SoundMan.Stop = true;
+disp('Stopping');
 guidata(hObject, handles);
+% Hint: delete(hObject) closes the figure
+delete(hObject);
+
+function SubjectID_Callback(hObject, eventdata, handles)
+% hObject    handle to SubjectID (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of SubjectID as text
+%        str2double(get(hObject,'String')) returns contents of SubjectID as a double
+handles.SoundMan.Plr.ID = str2double(get(hObject,'String'));
+disp(handles.SoundMan.Plr.ID);
+
+% --- Executes during object creation, after setting all properties.
+function SubjectID_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to SubjectID (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

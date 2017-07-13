@@ -4,17 +4,15 @@ classdef SoundManager < handle
 	
 	properties
 		%Holds all the sounds that will be played and the audioPlayer
-		Sounds;
+		Sounds = {};
+		Plr;
 		FilePlayer;
 		
 		rate;
+		Stop = false;
 		
 		%Contains the sound that total sound that will be played this tic
 		SoundToPlay = [];
-		
-		%Array which states which sounds to ignore
-			%Mostly debugging purposes
-		ToIgnore;
 		
 		%Holds two previous tics of sound in order to convolve to the right
 		%size
@@ -29,11 +27,9 @@ classdef SoundManager < handle
 	
 	methods
 		%Constructor
-		function obj = SoundManager(Sounds, rate, ToIgnore)
-			obj.Sounds = Sounds;
+		function obj = SoundManager(Player, rate)
+			obj.Plr = Player;
 			obj.rate = rate;
-			
-			obj.ToIgnore = ToIgnore;
 		end
 		
 		function setupEnvironment(obj)
@@ -53,20 +49,16 @@ classdef SoundManager < handle
 		
 		%Goe through each sound and calculates it's sound matrix and then
 		%adds it to the SoundToPlay matrix
-		function prepareSound(obj, plr, hrir_l, hrir_r, ITD, maze)
+		function prepareSound(obj, hrir_l, hrir_r, ITD)
 			%Set up variables and refresh the SoundToPlay
 			wav_left = [];
 			wav_right = [];
 			obj.SoundToPlay = [];
 			
-			%Default indices
-			aIndex = 1;
-			eIndex = 49;
-			
 			%Go through each sound
 			for i = 1:length(obj.Sounds)
 				%Skip certain sounds for debugging
-				if (obj.ToIgnore(i) == false || obj.Sounds{i}.Active == false)
+				if (obj.Sounds{i}.Active == false)
 					continue;
 				end
 				
@@ -77,26 +69,30 @@ classdef SoundManager < handle
 
 				%CONSIDER MOVING!!!!
 				%Preprocessing
-				if (~maze)
-					%If not maze then check distance and skip if too far
-					%If it's close enough calculate the effect on the sound
-					dist = plr.Position - obj.Sounds{i}.Position;
-					dist = norm(dist);
+				%If not maze then check distance and skip if too far
+				%If it's close enough calculate the effect on the sound
+				dist = obj.Plr.Position - obj.Sounds{i}.Position;
+				
+				dist = sqrt(dist(1)*dist(1) + dist(2)*dist(2));
 
-					if (dist > 1000)
-						continue;
-					end
-					
-					dist = dist/200;
-					dist = dist*dist;
-					
-					if (dist < 1)
-						dist = 1;
-					end
+				if (dist > 300)
+					continue;
+				end
+
+				%Shift and scale the distance for sound 
+				dist = (dist-30)/30;
+				
+				if (dist < 1)
+					dist = 1;
 				end
 				
+				dist = dist*dist;%*dist;
+				
+			%	[left, right] = HRTFManager.getHRTF(obj.Plr, obj.Sounds{i}.Position, hrir_l, hrir_r, ITD);
+				
+				%
 				%Get the azimuth angle and elevation index
-				[azAngle, eIndex] = FindAngle(plr, obj.Sounds{i}.Position);
+				[azAngle, eIndex] = FindAngle(obj.Plr, obj.Sounds{i}.Position);
 				%Get the correct index for a
 				aIndex = find(obj.azimuths == azAngle,1);
 				
@@ -115,6 +111,7 @@ classdef SoundManager < handle
 					left = [zeros(size(1:abs(delay))) left'];
 					right = [right' zeros(size(1:abs(delay)))];
 				end
+				%
 
 				%Determine how much of each side you need to the perfect
 				%size output of the convolution
@@ -153,11 +150,9 @@ classdef SoundManager < handle
 				
 				%CONSIDER MOVING!!!
 				%Post Processing
-				if (~maze)
-					%Apply the distance decay
-					wav_left = wav_left/(dist);
-					wav_right = wav_right/(dist);
-				end
+				%Apply the distance decay
+				wav_left = wav_left/(dist);
+				wav_right = wav_right/(dist);
 				
 				%Make sure soundToPlay is populated atleast once
 				if (size(obj.SoundToPlay) ~= [0,0])

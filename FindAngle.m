@@ -19,8 +19,6 @@ function [ azAngle, eIndex ] = FindAngle( plr, soundPos)
 		azAngle = -azAngle;
 	end
 	
-	disp(azAngle);
-	
 	%In the positive section make the sound come from the front
 	if (azAngle > -90 && azAngle < 90)
 		eIndex = 9;
