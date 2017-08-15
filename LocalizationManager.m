@@ -1,5 +1,5 @@
 classdef LocalizationManager < handle
-	%UNTITLED Summary of this class goes here
+	%UNTITLED Preliminary work to make the python integration its own class
 	%   Detailed explanation goes here
 	
 	properties

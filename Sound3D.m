@@ -21,10 +21,12 @@ classdef Sound3D < handle
 			obj.Active = Active;
 		end
 		
+		%Creates and stores its own fileReader
 		function createFR(obj)
 			obj.FileReader = dsp.AudioFileReader(obj.SoundFile, 'SamplesPerFrame', obj.SampleRate, 'PlayCount', obj.PlayCount);
 		end
 		
+		%Produces the next step of sound
 		function nextStep = getStep(obj)
 			nextStep = step(obj.FileReader);
 		end

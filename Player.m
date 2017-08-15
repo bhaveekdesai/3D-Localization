@@ -1,6 +1,7 @@
 classdef Player < handle
 	%PLAYER Holds all important user information
-	%   Detailed explanation goes here
+	%   Holds the players ID, Position, Front/Back Positions, Forward/Right
+	%   vector, and the path
 	
 	properties
 		ID = 0;
@@ -39,19 +40,29 @@ classdef Player < handle
 			%Get the front position
 			posFront = [double(posFront{1}); double(posFront{2})]/1;
 			
+			%If no previous then set it to the current location
 			if (obj.prevFront == 0)
 				obj.PosFront = posFront;
 			else
+				%Calculate the distance
 				dist = norm(obj.prevFront - obj.PosFront);
 				
+				%If the distance is smaller than 25 cm don't update
 				if (dist > 25)
+					%Change the distance to be a range from [0,1] with
+					%anything below 50 being 1
 					dist = min(50/dist, 1);
 				
+					%Now interpolate the distances in order to prevent
+					%massive leaps in space
+					
+					%Users will still move when jumps occur int he system
+					%but are buffered
 					obj.PosFront = dist*posFront + (1-dist)*obj.PosFront;
 				end
 			end
 			
-			
+			%See above for the same thing
 			if (obj.FroAndBac)
 				%Get the back position
 				posBack = [double(posBack{1}); double(posBack{2})]/1;
@@ -75,6 +86,7 @@ classdef Player < handle
 				obj.Position = obj.PosFront;
 			end
 			
+			%Add the location to the path
 			obj.Path(end+1,:) = obj.Position;
 			
 			%Check to see that the beacon didn't jump too far
@@ -84,11 +96,14 @@ classdef Player < handle
 		function calcForward(obj)
 			%If there's only 1 hedgehog then do nothing
 			if (obj.FroAndBac)
-				%Get the vector from back to front and normalize it
+				%In this instance the hedgehogs are oriented horizatonally
+				%so they form the right
 				obj.Right = obj.PosFront - obj.PosBack;
 				
+				%Normalize it
 				obj.Right = normc(obj.Right);
 				
+				%Calculate forward from the right vector
 				obj.Forward = [-obj.Right(2) obj.Right(1)];
 			end
 		end

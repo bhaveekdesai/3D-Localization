@@ -73,7 +73,7 @@ if (nargin > 4)
 	handles.filenames = {k.name}';
 	handles.FileChoose.String = handles.filenames;
 	
-	%Hard Code
+	%Hard Coded
 	
 	%General
 	soundNumber = length(handles.SoundMan.Sounds)+1;

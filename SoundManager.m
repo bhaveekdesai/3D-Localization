@@ -1,6 +1,7 @@
 classdef SoundManager < handle
 	%SOUNDMANAGER Controls the playing of audio
-	%   Detailed explanation goes here
+	%   Is responsible to hold all the sounds in the environment, create
+	%   the sounds every frame, and then play those sounds
 	
 	properties
 		%Holds all the sounds that will be played and the audioPlayer
@@ -19,6 +20,7 @@ classdef SoundManager < handle
 		prevSig;
 		currSig;
 		
+		%This can be deleted, not sure without testing
 		%25 locations
 		azimuths = [-80 -65 -55 -45:5:45 55 65 80];
 		%50 locations
@@ -32,22 +34,27 @@ classdef SoundManager < handle
 			obj.rate = rate;
 		end
 		
-		function setupEnvironment(obj)
-			for i = 1:length(obj.Sounds);
-				createFR(obj.Sounds{i});
-			end
-			
-			createFP(obj);
-			
-			obj.prevSig = zeros(length(obj.Sounds), obj.rate);
-			obj.currSig = zeros(length(obj.Sounds), obj.rate);
-		end
-		
+		%Creates FilePlayer to play the sound
 		function createFP(obj)
 			obj.FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', obj.rate, 'SampleRate', obj.Sounds{1}.FileReader.SampleRate);
 		end
 		
-		%Goe through each sound and calculates it's sound matrix and then
+		%Sets up the sounds after the are created
+		function setupEnvironment(obj)
+			%Creates a file reader for each sound
+			for i = 1:length(obj.Sounds);
+				createFR(obj.Sounds{i});
+			end
+			
+			%Creates the total audioPlayer
+			createFP(obj);
+			
+			%Sets up previous signals size
+			obj.prevSig = zeros(length(obj.Sounds), obj.rate);
+			obj.currSig = zeros(length(obj.Sounds), obj.rate);
+		end
+		
+		%Goes through each sound and calculates it's sound matrix and then
 		%adds it to the SoundToPlay matrix
 		function prepareSound(obj, hrir_l, hrir_r, ITD)
 			%Set up variables and refresh the SoundToPlay
@@ -69,7 +76,7 @@ classdef SoundManager < handle
 
 				%CONSIDER MOVING!!!!
 				%Preprocessing
-				%If not maze then check distance and skip if too far
+				%Check distance and skip if too far
 				%If it's close enough calculate the effect on the sound
 				dist = obj.Plr.Position - obj.Sounds{i}.Position;
 				
@@ -82,13 +89,18 @@ classdef SoundManager < handle
 				%Shift and scale the distance for sound 
 				dist = (dist-30)/30;
 				
+				%Stops division by 0
 				if (dist < 1)
 					dist = 1;
 				end
 				
+				%Sound intensity attentuation
 				dist = dist*dist;%*dist;
 				
-			%	[left, right] = HRTFManager.getHRTF(obj.Plr, obj.Sounds{i}.Position, hrir_l, hrir_r, ITD);
+				%PREPROCESSING STOP
+				
+				%Currently not working
+				%[left, right] = HRTFManager.getHRTF(obj.Plr, obj.Sounds{i}.Position, hrir_l, hrir_r, ITD);
 				
 				%
 				%Get the azimuth angle and elevation index
@@ -153,6 +165,7 @@ classdef SoundManager < handle
 				%Apply the distance decay
 				wav_left = wav_left/(dist);
 				wav_right = wav_right/(dist);
+				%POST PROCESSING STOP
 				
 				%Make sure soundToPlay is populated atleast once
 				if (size(obj.SoundToPlay) ~= [0,0])

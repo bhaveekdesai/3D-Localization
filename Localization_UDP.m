@@ -17,12 +17,16 @@ count = rounds;
 interval = 0.1;
 rate = 44100;
 
+%Calculate rate based on the interval length you require
 rate = rate*interval;
-%44100 - 1
-%11050 - 0.25
-%4410 - .1
+%44100 -- 1 s
+%11050 -- 0.25 s
+%4410 -- .1 s
 
+%Option to only use a single hedgehog and use default to forward facing
 FrontAndBack = true;
+%Option to use a virtual space and not need to set up the localization
+%system
 debugSound = false;
 
 if (debugSound)
@@ -38,6 +42,7 @@ localMan = 0;
 
 connFront = 0;
 connBack = 0;
+
 
 if (~debugSound)
 	%localMan = LocalizationManager(ip, port, 26, 27);
@@ -65,8 +70,9 @@ if (~debugSound)
 	mBIdFront = 26;
 	mBIdBack = 27;
 	
+	%For each beacon
 	for i = 1:length(beacons)
-		%Open the connect
+		%Open the connection
 		conns{i} = py.udpclient.udp_factory(ip,uint16(port),uint16(beacons(i)));
 		
 		%Get the beacon position
@@ -82,6 +88,7 @@ if (~debugSound)
 		
 		disp(distance);
 		
+		%Keep the farthest beacon
 		if (farthestDistance <= distance)
 			farthestBeacon = i;
 			farthestDistance = distance;
@@ -89,11 +96,12 @@ if (~debugSound)
 		
 	end
 
-	%Open the connection for each beacon
+	%Open the connection for each hedgehog
 	connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
 	connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 end
 
+%If using a virtual environment create its size
 if (debugSound)
 	beaconPositions(1,:) = [500;320];
 	farthestBeacon = 1;
@@ -113,16 +121,18 @@ plr = Player(playerPos, forward, FrontAndBack);
 %Sound Manager
 soundMan = SoundManager(plr, rate);
 
+%Start the menu
 menu = Menu(beaconPositions(farthestBeacon, 1),beaconPositions(farthestBeacon, 2), soundMan);
 
+%Set up the environmental factors
 setupEnvironment(soundMan);
 
+%Start the total time timer
 totalTime = tic;
 
-%Keep going until the user won (By reaching the exit cell)
+%Keep going until the user stops the program
 while (soundMan.Stop == false)
-	loopTime = tic;
-	
+	%If using a real environment update the user's location
 	if (~debugSound)
 		coordsFront = connFront.request_position();
 		
@@ -130,29 +140,25 @@ while (soundMan.Stop == false)
 			coordsBack = connBack.request_position();
 		end
 		
+		%Set the position
 		calcPosition(plr, coordsFront, coordsBack);
+		%Determine the forward vector
 		calcForward(plr);
 		
 		playerPos = plr.Position;
 	end
 	
+	%Prepare the total sound environment for the current sound frame
 	prepareSound(soundMan, hrir_l, hrir_r, ITD);
 	
 	%Play that sound
 	playSound(soundMan);
 	
-	%disp(toc(loopTime));
-	
-	%Allow the sound to play
+	%Have a quick pause in order to allow users to use the menu
 	pause(interval/5);
-	
-	%Sleep to be more precise
-	%java.lang.Thread.sleep(max(interval - 20*toc(loopTime),0)*1000);
-	
-	%disp(toc(loopTime));
 end
 
-%SSet Up User Struct
+%Set Up User Struct
 userData.ID = plr.ID;
 userData.Interval = interval;
 userData.TimeSpent = toc(totalTime);
